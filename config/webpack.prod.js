@@ -11,9 +11,9 @@ const optimizeCss = require('optimize-css-assets-webpack-plugin'); // 生产模�
 const ManifestPlugin = require('webpack-manifest-plugin');
 const config = {
     output: {
-        path: path.resolve(__dirname, './build'),
-        filename: "js/[name][chunkhash].js" , // 有发生改变的模块保持名称以使浏览器从缓存中获取，在生产模式下使用[chunkhash]替代[hash]
-        chunkFilename: '[name].[contenthash:8].chunk.js'
+        path: path.resolve(__dirname, '../build'),
+        filename: "[name]/js/[name][chunkhash].js" , // 有发生改变的模块保持名称以使浏览器从缓存中获取，在生产模式下使用[chunkhash]替代[hash]
+        chunkFilename: '[name].[chunkhash:8].chunk.js'
     },
     plugins: [
         new optimizeCss({

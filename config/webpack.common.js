@@ -2,7 +2,7 @@ const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin'); // 配置https://github.com/johnagan/clean-webpack-plugin
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const {entry, template} = require('./getEntry.js');
+const {entry, outHtml} = require('./getEntry.js');
 // module.exports = {
 //     entry: './src/index.js',
 //     output: {

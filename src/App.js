@@ -12,8 +12,8 @@ function App() {
         // <div className='title'>
         <div className={styles.title}>
             hello react
-            {/* <img src={pic_1} alt=""/> */}
-            {/* <img src={pic_2} alt=""/> */}
+            <img src={pic_1} alt="" style={{width: 100, height: 100}}/>
+            <img src={pic_2} alt="" style={{width: 100, height: 100}}/>
             <Btn></Btn>
         </div>
     )

@@ -3,7 +3,8 @@ const merge = require('webpack-merge');
 const path = require('path');
 const config = {
     output: {
-        filename: "js/[name][chunkhash].js"
+        filename: "[name].js",
+        // publicPath: "/dist/"
     },
 // 配置webpack-dev-server
     devServer: {

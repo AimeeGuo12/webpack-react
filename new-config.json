@@ -1,11 +1,11 @@
 {
     "entry": [
         {
-            "entryPath": "./src/am-a/am-a-index1/main/index.js",
+            "entryPath": "./src/am-a/am-a-index1/third/main/index.js",
             "template": "./template/index.html"
         },
         {
-            "entryPath": "./src/am-b/am-b-index1/main/index.js",
+            "entryPath": "./src/am-b/am-b-index1/third/main/index.js",
             "template": "./template/index.html"
         }
     ]

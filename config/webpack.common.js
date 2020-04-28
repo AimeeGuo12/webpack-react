@@ -2,7 +2,11 @@ const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin'); // 配置https://github.com/johnagan/clean-webpack-plugin
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const {entry, outHtml} = require('./getEntry.js');
+const getEntry = require('./getEntry.js');
+const entryOption = getEntry();
+const entry = entryOption.entry;
+const outHtml = entryOption.outHtml;
+
 // module.exports = {
 //     entry: './src/index.js',
 //     output: {
@@ -67,28 +71,30 @@ function webpackCommonConfigCreator(options) {
     return {
         mode: options.mode,
         entry: entry,
+        // entry: './src/index.js',
         output: {
             // filename: "bundle.js",  // 如果都放在一个文件中，文件体积会非常大，所以分割bundle
             // filename: "js/[name][hash].js", // 为了在每次修改代码后，浏览器都能获取到最新的js，通常会对output的名添加hash值
             // filename: "js/bundle.js",
             path: path.resolve(__dirname, '../build'),
-            publicPath: "/"
+            // publicPath: "/"
         },
         plugins: [
-            new HtmlWebpackPlugin({
-                template: path.resolve(__dirname, '../template/index.html'),// './template/index.html', // 自己创建一个html模板，这样可以随意引入需要的html结构
-                title: 'Webpack Demo',  // html的标题成了Webpack Demo
-                filename: 'index.html',  // 在输出目录生成的html文件名变味了demo.html
-                minify: { collapseWhitespace: true },  // 并且html还被压缩了，去掉了里面所有可折叠的空白元素。
-                hash: true // 引用的js有了hash值，
-            }),
+            // new HtmlWebpackPlugin({
+            //     template: path.resolve(__dirname, '../template/index.html'),// './template/index.html', // 自己创建一个html模板，这样可以随意引入需要的html结构
+            //     title: 'Webpack Demo',  // html的标题成了Webpack Demo
+            //     filename: 'index.html',  // 在输出目录生成的html文件名变味了demo.html
+            //     minify: { collapseWhitespace: true },  // 并且html还被压缩了，去掉了里面所有可折叠的空白元素。
+            //     hash: true // 引用的js有了hash值，
+            // }),
             new CleanWebpackPlugin({
                 cleanOnceBeforeBuildPatterns: [path.resolve(process.cwd(), "build/"), path.resolve(process.cwd(), "dist/")]
             }),
             new ExtractTextPlugin({
                 filename: "[name][hash].css", //编译后的css由js动态内联在html中，使用此分离到单独的文件
                 // filename: "css/[name][hash].css"
-            })
+            }),
+            ...outHtml
         ],
         module: {
             rules: [

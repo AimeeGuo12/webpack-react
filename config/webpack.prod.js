@@ -12,8 +12,17 @@ const ManifestPlugin = require('webpack-manifest-plugin');
 const config = {
     output: {
         path: path.resolve(__dirname, '../build'),
-        filename: "[name]/js/[name][chunkhash].js" , // 有发生改变的模块保持名称以使浏览器从缓存中获取，在生产模式下使用[chunkhash]替代[hash]
-        chunkFilename: '[name].[chunkhash:8].chunk.js'
+        filename: "[name]_[hash:8].js" , // 有发生改变的模块保持名称以使浏览器从缓存中获取，在生产模式下使用[chunkhash]替代[hash]
+        chunkFilename: '[name].js',
+        library: '[name]',
+        libraryTarget: 'umd',
+        publicPath: '../../../../'
+    },
+    resolve: {
+        extensions: ['.js', '.jsx'],
+        alias: {
+            'src': path.resolve(__dirname, '../src/')
+        }
     },
     plugins: [
         new optimizeCss({

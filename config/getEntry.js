@@ -14,7 +14,7 @@ module.exports = () =>{
                 })
             })
         } else {
-            files = files.concat(glob.sync(item));
+            files = files.concat(glob.sync(filepath));
         }
     });
 
@@ -29,6 +29,7 @@ module.exports = () =>{
         }
         else {
             key = item.replace('./src/', '').slice(0, -3);
+            entryTemplateMap[key] = newConfig["default-template"];
             entryPath = item;
         }
         
@@ -52,7 +53,7 @@ module.exports = () =>{
     
     return {
         entry,
-        // template: entryTemplateMap
+        template: entryTemplateMap,
         outHtml
     }
 }

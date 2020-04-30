@@ -14,13 +14,15 @@ const config = {
         path: path.resolve(__dirname, '../build'),
         filename: "[name]_[hash:8].js" , // 有发生改变的模块保持名称以使浏览器从缓存中获取，在生产模式下使用[chunkhash]替代[hash]
         chunkFilename: '[name].js',
-        library: '[name]',
-        libraryTarget: 'umd',
+        // library和libraryTarget配合使用，可以打包项目作为一个库供不同环境的程序调用
+        // library是个字符串，如：webpackNumbers，libraryTarget取值指定运行环境
+        library: '[name]', 
+        libraryTarget: 'umd', // 则library在 AMD 或 CommonJS 的 require 之后可访问
         publicPath: '../../../../'
     },
     resolve: {
-        extensions: ['.js', '.jsx'],
-        alias: {
+        extensions: ['.js', '.jsx'], //将要自动解析的文件后缀
+        alias: { // alias用来给指定路径设置一个别名，方便路径书写。同时，缓存路径也能提高编译速度。
             'src': path.resolve(__dirname, '../src/')
         }
     },

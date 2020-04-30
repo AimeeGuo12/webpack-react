@@ -7,6 +7,9 @@
         {
             "entryPath": "./src/am-b/am-b-index1/third/main/index.js",
             "template": "./template/index.html"
-        }
-    ]
+        },
+        "./src/hrhi/**/main/index.js"
+       
+    ],
+    "default-template": "./template/index.html"
 }

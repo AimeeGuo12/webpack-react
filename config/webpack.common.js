@@ -2,6 +2,7 @@ const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin'); // 配置https://github.com/johnagan/clean-webpack-plugin
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const happyPack = require('happypack'); // 多线程打包 happyPack把所有串行的东西并行处理,使得loader并行处理，较少文件处理时间
 const getEntry = require('./getEntry.js');
 const entryOption = getEntry();
 const entry = entryOption.entry;
@@ -79,6 +80,12 @@ function webpackCommonConfigCreator(options) {
             path: path.resolve(__dirname, '../build'),
             // publicPath: "/"
         },
+        resolve: {
+            extensions: ['.js', '.jsx'],
+            alias: {
+                'src': path.resolve(__dirname, '../src/')
+            }
+        },
         plugins: [
             // new HtmlWebpackPlugin({
             //     template: path.resolve(__dirname, '../template/index.html'),// './template/index.html', // 自己创建一个html模板，这样可以随意引入需要的html结构
@@ -91,13 +98,56 @@ function webpackCommonConfigCreator(options) {
                 cleanOnceBeforeBuildPatterns: [path.resolve(process.cwd(), "build/"), path.resolve(process.cwd(), "dist/")]
             }),
             new ExtractTextPlugin({
-                filename: "[name][hash].css", //编译后的css由js动态内联在html中，使用此分离到单独的文件
-                // filename: "css/[name][hash].css"
+                filename: "[name].css", //编译后的css由js动态内联在html中，使用此分离到单独的文件
+            }),
+            new webpack.DllReferencePlugin({
+                 // 注意: DllReferencePlugin 的 context 必须和 package.json 的同级目录，要不然会链接失败
+            context: path.resolve(__dirname, '../'),
+            manifest: path.resolve(__dirname, './dll/vendors.manifest.json')  // 读取dll打包后的manifest.json，分析哪些代码跳过
+            }),
+            new happyPack({
+                loaders: ['babel-loader'],
+                threads: 2
             }),
             ...outHtml
         ],
         module: {
-            rules: [
+            rules: [ //每个元素对应一个规则
+                {
+                   test: /\.(jsx|js)$/,
+                   exclude: /node_modules/,
+                   use: {
+                       loader: 'happypack/loader',
+                       options: {
+                           presets: ['env', 'react'],
+                           plugins: [
+                               ['import-bee', {
+                                   'style': true
+                               }],
+                               'transform-class-properties', // 解决 es6 中使用class声明中 ：defaultProps={} 不支持的问题。需要使用 stage-0 或者 该插件转义。
+                            //["transform-class-properties", { "spec": false }]
+                            //当 spec 为 true 时，
+                            // 使用 Object.defineProperty 取代 title='a' 这样的赋值操作。
+                            // 静态变量（cover）即使没有初始值，也会创建。
+                               'transform-runtime',
+                               'babel-plugin-transform-regenerator'
+                           ]
+                       }
+                   } 
+                },
+                // {
+                //     test: /\.(js|jsx)$/,
+                //     include: path.resolve(__dirname, '../src'),
+                //     exclude: /(node_modules|bower_components)/,
+                //     use: {
+                //         loader: 'babel-loader',
+                //         options: {
+                //             // presets: ['es2015']
+                //             presets: ['@babel/preset-react'],
+                //             plugins: ["react-hot-loader/babel"],
+                //         }
+                //     }
+                // },
                 {
                     // test: /\.css$/, // 将css和loader建立联系
                     test: /\.(css|scss)$/,
@@ -184,19 +234,6 @@ function webpackCommonConfigCreator(options) {
                             }
                         }
                     ]
-                },
-                {
-                    test: /\.(js|jsx)$/,
-                    include: path.resolve(__dirname, '../src'),
-                    exclude: /(node_modules|bower_components)/,
-                    use: {
-                        loader: 'babel-loader',
-                        options: {
-                            // presets: ['es2015']
-                            presets: ['@babel/preset-react'],
-                            plugins: ["react-hot-loader/babel"],
-                        }
-                    }
                 },
                 {
                     test: /\.(woff|woff2|eto|ttf|otf)$/,

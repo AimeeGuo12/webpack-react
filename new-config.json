@@ -11,5 +11,19 @@
         "./src/hrhi/**/main/index.js"
        
     ],
-    "default-template": "./template/index.html"
+    "default-template": "./template/index.html",
+    "dll-entry": {
+		"entry": [ ],
+		"watch": false
+    },
+    "dev-server": {
+		"refresh-immediately": true,
+		"refresh-immediately-comment": "有改变后立即刷新"
+    },
+    "copy": [
+        { "from": "./src/hrhi/public", "to": "./hrhi/public" }
+       
+    ],
+    "lib": {},
+    "proxy": {}
 }

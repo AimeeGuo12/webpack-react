@@ -2,10 +2,10 @@ const glob = require('glob');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const newConfig = require('../new-config');
 
-module.exports = () =>{
+module.exports = (type = 'entry') =>{
     let entry = {}, pageName = '',entryTemplateMap=[]
     let files = [], outHtml = [];
-    newConfig["entry"].map((filepath) => {
+    newConfig['entry'].map((filepath) => {
         if (typeof filepath === 'object') {
             glob.sync(filepath.entryPath).map((onePath) => {
                 files.push({

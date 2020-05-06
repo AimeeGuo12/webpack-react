@@ -1,6 +1,7 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin'); // 配置https://github.com/johnagan/clean-webpack-plugin
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const happyPack = require('happypack'); // 多线程打包 happyPack把所有串行的东西并行处理,使得loader并行处理，较少文件处理时间
 const getEntry = require('./getEntry.js');
@@ -68,17 +69,25 @@ const outHtml = entryOption.outHtml;
 // }
 // common文件导出一个可传参数的基本配置生成器, 
 // prod和dev文件使用webpack-merge将通用配置和各自模式下的配置进行合并导出
-function webpackCommonConfigCreator(options) {
-    return {
-        mode: options.mode,
+module.exports = {
+    mode: 'development',
+        // mode: options.mode,
         entry: entry,
         // entry: './src/index.js',
+        // output: {
+        //     // filename: "bundle.js",  // 如果都放在一个文件中，文件体积会非常大，所以分割bundle
+        //     // filename: "js/[name][hash].js", // 为了在每次修改代码后，浏览器都能获取到最新的js，通常会对output的名添加hash值
+        //     // filename: "js/bundle.js",
+        //     path: path.resolve(__dirname, '../build'),
+        //     // publicPath: "/"
+        // },
         output: {
-            // filename: "bundle.js",  // 如果都放在一个文件中，文件体积会非常大，所以分割bundle
-            // filename: "js/[name][hash].js", // 为了在每次修改代码后，浏览器都能获取到最新的js，通常会对output的名添加hash值
-            // filename: "js/bundle.js",
-            path: path.resolve(__dirname, '../build'),
-            // publicPath: "/"
+            filename: '[name].js',
+            path: path.join(__dirname, '../dist'),
+            publicPath: '/',
+            library: '[name]',
+            libraryTarget: 'umd',
+            chunkFilename: '[name][chunkhash:8].js'
         },
         resolve: {
             extensions: ['.js', '.jsx'],
@@ -100,14 +109,19 @@ function webpackCommonConfigCreator(options) {
             new ExtractTextPlugin({
                 filename: "[name].css", //编译后的css由js动态内联在html中，使用此分离到单独的文件
             }),
-            new webpack.DllReferencePlugin({
-                 // 注意: DllReferencePlugin 的 context 必须和 package.json 的同级目录，要不然会链接失败
-            context: path.resolve(__dirname, '../'),
-            manifest: path.resolve(__dirname, './dll/vendors.manifest.json')  // 读取dll打包后的manifest.json，分析哪些代码跳过
-            }),
-            new happyPack({
+            // new webpack.DllReferencePlugin({
+            //      // 注意: DllReferencePlugin 的 context 必须和 package.json 的同级目录，要不然会链接失败
+            // context: path.resolve(__dirname, '../'),
+            // manifest: path.resolve(__dirname, './dll/vendors.manifest.json')  // 读取dll打包后的manifest.json，分析哪些代码跳过
+            // }),
+            //HappyPack 
+            //允许 Webpack 使用 Node 多线程进行构建来提升构建的速度。
+            // 使用的方法与在 Webpack 中定义 loader 的方法类似，只是说，我们把构建需要的 loader 放到了 HappyPack 中，让 HappyPack 来为我们进行相应的操作，
+            // 我们只需要在 Webpack 的配置中引入 HappyPack 的 loader 的配置就好了。
+            // 其中，threads 指明 HappyPack 使用多少子进程来进行编译，一般设置为 4 为最佳。
+            new happyPack({ 
                 loaders: ['babel-loader'],
-                threads: 2
+                threads: 4
             }),
             ...outHtml
         ],
@@ -251,6 +265,6 @@ function webpackCommonConfigCreator(options) {
                 minChunks: 1
             }
         }
-    }
+    
 }
-module.exports = webpackCommonConfigCreator;
+// module.exports = webpackCommonConfigCreator;

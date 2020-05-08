@@ -69,7 +69,8 @@ function runDllCompile() {
 function runCompile(m = []) {
     let pageCompiler = null;
     let pageWBC = {
-        ...webpackCommonConfig
+        ...webpackCommonConfig,
+        plugins: [new webpack.HotModuleReplacementPlugin()]  //1.热更新模块配置
     };
     pageCompiler = webpack(pageWBC)
     let libCompile = webpack({
@@ -84,8 +85,8 @@ function runCompile(m = []) {
             contentBase: path.join(__dirname, '../dist'),
             // proxy: config.proxy,
             stats: 'errors-only',
-            // inline: config['dev-server']['refresh-immediately'],
-            hot: true // 开启webpackDevServer热加载
+            inline: config['dev-server']['refresh-immediately'],
+            // hot: true // 开启webpackDevServer热加载
         })
         server.listen(3000, '127.0.0.1', () => {
             console.log('Starting server on http://localhost:8080');

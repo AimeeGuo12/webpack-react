@@ -6,15 +6,15 @@
 {
 	"presets": [ "@babel/preset-env", "@babel/preset-react"], //, "stage-2" 
 	"plugins": [
-		"jsx-control-statements",
+		// "jsx-control-statements",
 		// [
-		// 	// "import-bee",
-		// 	// {
-		// 	// 	"style": true
-		// 	// }
+		// 	"import-bee",
+		// 	{
+		// 		"style": true
+		// 	}
 		// ],
 		// "transform-decorators-legacy",
-		"@babel/plugin-transform-runtime",
+		"@babel/plugin-transform-runtime"
 		// "babel-plugin-transform-regenerator"
 	]
 }

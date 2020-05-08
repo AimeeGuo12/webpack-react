@@ -89,6 +89,7 @@ module.exports = {
             libraryTarget: 'umd',
             chunkFilename: '[name][chunkhash:8].js'
         },
+        devtool: "inline-source-map",
         resolve: {
             extensions: ['.js', '.jsx'],
             alias: {
@@ -123,6 +124,7 @@ module.exports = {
                 loaders: ['babel-loader'],
                 threads: 4
             }),
+ 
             ...outHtml
         ],
         module: {
@@ -133,7 +135,7 @@ module.exports = {
                    use: {
                        loader: 'happypack/loader',
                        options: {
-                           presets: ['env', 'react'],
+                           presets: ["@babel/preset-env", "@babel/preset-react"],
                            plugins: [
                                ['import-bee', {
                                    'style': true
@@ -143,7 +145,7 @@ module.exports = {
                             //当 spec 为 true 时，
                             // 使用 Object.defineProperty 取代 title='a' 这样的赋值操作。
                             // 静态变量（cover）即使没有初始值，也会创建。
-                               'transform-runtime',
+                            "@babel/plugin-transform-runtime",
                                'babel-plugin-transform-regenerator'
                            ]
                        }

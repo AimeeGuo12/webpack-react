@@ -1,5 +1,5 @@
 import React from 'react';
-import {hot} from 'react-hot-loader/root';
+// import {hot} from 'react-hot-loader/root';
 import './app.css';
 // import './app.scss';
 import styles from './app.scss';
@@ -18,4 +18,5 @@ function App() {
         </div>
     )
 }
-export default hot(App);
+// export default hot(App);
+export default App;

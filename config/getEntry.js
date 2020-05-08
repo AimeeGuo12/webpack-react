@@ -41,16 +41,16 @@ module.exports = (type = 'entry') =>{
             filename: templateName,
             template: entryTemplateMap[key],
             inject: true,
-            // chunks: [pageName, 'common'],
+            chunks: ['index'],// 需要插入该html的js文件，从入口文件中选取对应的js文件名称（打包后的js文件名称）
             minify: {
                 removeComments: true,
-                collapseWhitespace: true,
-                removeAttributeQuotes: true
+                collapseWhitespace: true, //压缩空白
+                removeAttributeQuotes: true //删除属性双引号
             },
-            hash: true
+            hash: true // 消除缓存，添加版本号
         }))
     })
-    
+    console.log(outHtml)
     return {
         entry,
         template: entryTemplateMap,

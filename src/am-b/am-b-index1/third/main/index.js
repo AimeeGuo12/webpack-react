@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { hot } from 'react-hot-loader/root';
-// import './app.css';
+import './index';
 // import './app.scss';
 // import styles from './app.scss';
 // import Btn from './components/Btn';

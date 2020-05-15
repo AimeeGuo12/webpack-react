@@ -7,7 +7,7 @@ export default function Btn() {
     }
     return (
         <div>
-            <Button type="danger" onClick={() => clickHandle()}>click me2</Button>
+            <Button type="danger" onClick={() => clickHandle()}>click me2222</Button>
         </div>
     )
 }

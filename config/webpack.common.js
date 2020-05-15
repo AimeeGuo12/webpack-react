@@ -2,13 +2,16 @@ const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin'); // 配置https://github.com/johnagan/clean-webpack-plugin
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const happyPack = require('happypack'); // 多线程打包 happyPack把所有串行的东西并行处理,使得loader并行处理，较少文件处理时间
+const ExtractTextPlugin = require('extract-text-webpack-plugin'); // webpack4 作废？
+// 将css单独打包成一个文件的插件，它为每个包含css的js文件都创建一个css文件。它支持css和sourceMaps的按需加载
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");// //  相比于extract-text-webpack-plugin 异步加载 无重复编译，性能有所提升 支持css分割
+const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
+// const HappyPack = require('happypack'); // 多线程打包 happyPack把所有串行的东西并行处理,使得loader并行处理，较少文件处理时间
 const getEntry = require('./getEntry.js');
 const entryOption = getEntry();
 const entry = entryOption.entry;
 const outHtml = entryOption.outHtml;
-
+console.log(outHtml)
 // module.exports = {
 //     entry: './src/index.js',
 //     output: {
@@ -82,16 +85,23 @@ module.exports = {
         //     // publicPath: "/"
         // },
         output: {
-            filename: '[name].js',
+            filename: '[name].js', // [name]指向entry中的key值
             path: path.join(__dirname, '../dist'),
-            publicPath: '/',
+            publicPath: '../../../../',
             library: '[name]',
             libraryTarget: 'umd',
-            chunkFilename: '[name][chunkhash:8].js'
+            chunkFilename: '[name][chunkhash:8].js',
         },
         devtool: "inline-source-map",
+        externals: {
+            'react': 'React',
+            'react-dom': 'ReactDOM',
+            // 'react-router': 'ReactRouter',
+            'redux': 'Redux',
+            'react-redux': 'ReactRedux'
+        },
         resolve: {
-            extensions: ['.js', '.jsx'],
+            extensions: ['.js', '.jsx'], // 在导入语句没带文件后缀时，Webpack 会自动带上后缀后去尝试访问文件是否存在。  resolve.extensions 用于配置在尝试过程中用到的后缀列表，
             alias: {
                 'src': path.resolve(__dirname, '../src/')
             }
@@ -104,12 +114,16 @@ module.exports = {
             //     minify: { collapseWhitespace: true },  // 并且html还被压缩了，去掉了里面所有可折叠的空白元素。
             //     hash: true // 引用的js有了hash值，
             // }),
+            new MiniCssExtractPlugin({
+                filename: '[name].css'
+            }),
+            new FriendlyErrorsWebpackPlugin(),
             new CleanWebpackPlugin({
                 cleanOnceBeforeBuildPatterns: [path.resolve(process.cwd(), "build/"), path.resolve(process.cwd(), "dist/")]
             }),
-            new ExtractTextPlugin({
-                filename: "[name].css", //编译后的css由js动态内联在html中，使用此分离到单独的文件
-            }),
+            // new ExtractTextPlugin({
+            //     filename: "[name].css", //编译后的css由js动态内联在html中，使用此分离到单独的文件
+            // }),
             // new webpack.DllReferencePlugin({
             //      // 注意: DllReferencePlugin 的 context 必须和 package.json 的同级目录，要不然会链接失败
             // context: path.resolve(__dirname, '../'),
@@ -117,127 +131,149 @@ module.exports = {
             // }),
             //HappyPack 
             //允许 Webpack 使用 Node 多线程进行构建来提升构建的速度。
-            // 使用的方法与在 Webpack 中定义 loader 的方法类似，只是说，我们把构建需要的 loader 放到了 HappyPack 中，让 HappyPack 来为我们进行相应的操作，
+            // 使用的方法H与在 Webpack 中定义 loader 的方法类似，只是说，我们把构建需要的 loader 放到了 HappyPack 中，让 HappyPack 来为我们进行相应的操作，
             // 我们只需要在 Webpack 的配置中引入 HappyPack 的 loader 的配置就好了。
             // 其中，threads 指明 HappyPack 使用多少子进程来进行编译，一般设置为 4 为最佳。
-            new happyPack({ 
-                loaders: ['babel-loader'],
-                threads: 4
-            }),
+            // new HappyPack({ 
+            //     id: 'happyBabel',
+            //     loaders: [{loader: 'babel-loader'}],
+            //     threads: 4,
+            //     verbose: true // 允许happyPack输出日志
+            // }),
  
-            ...outHtml
-        ],
+            // ...outHtml
+        ].concat(outHtml),
         module: {
             rules: [ //每个元素对应一个规则
-                {
-                   test: /\.(jsx|js)$/,
-                   exclude: /node_modules/,
-                   use: {
-                       loader: 'happypack/loader',
-                       options: {
-                           presets: ["@babel/preset-env", "@babel/preset-react"],
-                           plugins: [
-                               ['import-bee', {
-                                   'style': true
-                               }],
-                               'transform-class-properties', // 解决 es6 中使用class声明中 ：defaultProps={} 不支持的问题。需要使用 stage-0 或者 该插件转义。
-                            //["transform-class-properties", { "spec": false }]
-                            //当 spec 为 true 时，
-                            // 使用 Object.defineProperty 取代 title='a' 这样的赋值操作。
-                            // 静态变量（cover）即使没有初始值，也会创建。
-                            "@babel/plugin-transform-runtime",
-                               'babel-plugin-transform-regenerator'
-                           ]
-                       }
-                   } 
-                },
                 // {
-                //     test: /\.(js|jsx)$/,
-                //     include: path.resolve(__dirname, '../src'),
-                //     exclude: /(node_modules|bower_components)/,
-                //     use: {
-                //         loader: 'babel-loader',
-                //         options: {
-                //             // presets: ['es2015']
-                //             presets: ['@babel/preset-react'],
-                //             plugins: ["react-hot-loader/babel"],
-                //         }
-                //     }
+                //    test: /\.(jsx|js)$/,
+                //    exclude: /node_modules/,
+                //    use: {
+                //        loader: 'happypack/loader?id=happybabel',
+                //        options: {
+                //            presets: ["@babel/preset-env", "@babel/preset-react"],
+                //            plugins: [
+                //                ['import-bee', {
+                //                    'style': true
+                //                }],
+                //             //    'transform-class-properties', // 解决 es6 中使用class声明中 ：defaultProps={} 不支持的问题。需要使用 stage-0 或者 该插件转义。
+                //             ["transform-class-properties", { "spec": true }],
+                //             //当 spec 为 true 时，
+                //             // 使用 Object.defineProperty 取代 title='a' 这样的赋值操作。
+                //             // 静态变量（cover）即使没有初始值，也会创建。
+                //             "@babel/plugin-transform-runtime",
+                //                '@babel/plugin-transform-regenerator'
+                //            ]
+                //        }
+                //    } 
                 // },
                 {
-                    // test: /\.css$/, // 将css和loader建立联系
-                    test: /\.(css|scss)$/,
+                    test: /\.(js|jsx)$/,
                     include: path.resolve(__dirname, '../src'),
-                    // use: ['style-loader', 'css-loader'], ////webpack读取loader顺序是从右向左读,所以后续步骤的loader在前面
-                    // use: ['style-loader', 'css-loader', 'sass-loader'],
-                    // use: [
-                    //     "style-loader",
-                    //     {
-                    //         loader: "css-loader",
-                    //         options: {
-                    //             modules: {
-                    //                 mode: "local",
-                    //                 localIdentName: '[path][name]_[local]--[hash:base:5]'
-                    //             },
-                    //             localsConvention: 'camelCase'
-                    //         }
-                    //     },
-                    //     "sass-loader"
-                    // ],
-                    use: ExtractTextPlugin.extract({
-                        fallback: "style-loader",
-                        use: [
-                            {
-                                loader: "css-loader",
-                                options: {
-                                    modules: {
-                                        mode: "local",
-                                        localIdentName: '[path][name]_[local]--[hash:base64:5]'
-                                    },
-                                    localsConvention: 'camelCase'
-                                }
-                            },
-                            {
-                                loader: "postcss-loader", // 使用postcss对css3属性添加前缀
-                                options: { 
-                                    ident: 'postcss',
-                                    plugins: loader => [
-                                        require('postcss-import')({root: loader.resourcePath}),
-                                        require('autoprefixer')()
-                                    ]
-                                }
-                            },
-                            "sass-loader"
-                        ]
-                    })
-                },
-                // 为第三方包配置css解析，将样式表直接导出
-                {
-                    test: /\.(css|scss)$/,
-                    exclude: path.resolve(__dirname, '../src'),
-                    use: [
-                        "style-loader", // style-loader/url
-                        {
-                            loader: 'file-loader',
-                            options: {
-                                name: "css/[name].css"
-                            }
+                    exclude: /(node_modules|bower_components)/,
+                    use: {
+                        loader: 'babel-loader',
+                        options: {
+                            presets: ["@babel/preset-env", "@babel/preset-react"],
+                            plugins: [
+                             ["transform-class-properties", { "spec": true }],
+                             "@babel/plugin-transform-runtime",
+                            '@babel/plugin-transform-regenerator'
+                            ]
                         }
+                    }
+                },
+                // {
+                //     // test: /\.css$/, // 将css和loader建立联系
+                //     test: /\.(css|scss)$/,
+                //     include: path.resolve(__dirname, '../src'),
+                //     // use: ['style-loader', 'css-loader'], ////webpack读取loader顺序是从右向左读,所以后续步骤的loader在前面
+                //     // use: ['style-loader', 'css-loader', 'sass-loader'],
+                //     // use: [
+                //     //     "style-loader",
+                //     //     {
+                //     //         loader: "css-loader",
+                //     //         options: {
+                //     //             modules: {
+                //     //                 mode: "local",
+                //     //                 localIdentName: '[path][name]_[local]--[hash:base:5]'
+                //     //             },
+                //     //             localsConvention: 'camelCase'
+                //     //         }
+                //     //     },
+                //     //     "sass-loader"
+                //     // ],
+                //     use: ExtractTextPlugin.extract({
+                //         fallback: "style-loader",
+                //         use: [
+                //             {
+                //                 loader: "css-loader",
+                //                 options: {
+                //                     modules: {
+                //                         mode: "local",
+                //                         localIdentName: '[path][name]_[local]--[hash:base64:5]'
+                //                     },
+                //                     localsConvention: 'camelCase'
+                //                 }
+                //             },
+                //             {
+                //                 loader: "postcss-loader", // 使用postcss对css3属性添加前缀
+                //                 options: { 
+                //                     ident: 'postcss',
+                //                     plugins: loader => [
+                //                         require('postcss-import')({root: loader.resourcePath}),
+                //                         require('autoprefixer')()
+                //                     ]
+                //                 }
+                //             },
+                //             "sass-loader"
+                //         ]
+                //     })
+                // },
+                // // 为第三方包配置css解析，将样式表直接导出
+                // {
+                //     test: /\.(css|scss)$/,
+                //     exclude: path.resolve(__dirname, '../src'),
+                //     use: [
+                //         "style-loader", // style-loader/url
+                //         {
+                //             loader: 'file-loader',
+                //             options: {
+                //                 name: "css/[name].css"
+                //             }
+                //         }
+                //     ]
+                // },
+                {
+                    test: /\.css$/,
+                    exclude: /node_modules/,
+                    use: [
+                        MiniCssExtractPlugin.loader,
+                        {
+                            loader: 'css-loader',
+                            options: {
+                                mode: 'local',
+                                modules: true,
+                                localIdentName: '[name]--[local]--[hash:base64:5]'
+                            }
+                        },
+                        'postcss-loader'
                     ]
                 },
                 {
                     test: /\.less$/,
-                    use: [{
-                        loader: "style-loader" // creates style nodes from JS strings
-                    }, {
-                        loader: "css-loader" // translates CSS into CommonJS
-                    }, {
-                        loader: "less-loader" // compiles Less to CSS
-                    }]
+                    exclude: /node_modules/,
+                    use: [
+                        MiniCssExtractPlugin.loader,
+                        'css-loader',
+                        'postcss-loader',
+                        'less-loader'
+                    ]
                 },
                
                 {
-                    test: /\.(png|jpg|jpeg|gif|svg)$/,
+                    test: /\.(png|jpg|jpeg|gif|eot|ttf|woff|woff2|svg|svgz|xlsx)(\?.+)?$/,
+                    exclude: /favicon\.png$/,
                     use: [
                         {
                             loader: 'url-loader',

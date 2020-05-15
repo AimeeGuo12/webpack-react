@@ -2,16 +2,16 @@
     "entry": [
         {
             "entryPath": "./src/am-a/am-a-index1/third/main/index.js",
-            "template": "./template/index.html"
+            "template": "./index.html"
         },
         {
             "entryPath": "./src/am-b/am-b-index1/third/main/index.js",
-            "template": "./template/index.html"
+            "template": "./index.html"
         },
         "./src/hrhi/**/main/index.js"
        
     ],
-    "default-template": "./template/index.html",
+    "default-template": "./index.html",
     "dll-entry": {
 		"entry": [ ],
 		"watch": false

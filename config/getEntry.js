@@ -22,35 +22,50 @@ module.exports = (type = 'entry') =>{
      files.map((item) => {
         let key = '';
         let entryPath = '';
+        // let name = '';
         if(typeof item === 'object') {
             key = item.entryPath.replace('./src/', '').slice(0, -3); //  // 这个文件名就是dist里的目录
             entryTemplateMap[key] = item.template;
             entryPath = item.entryPath;
+
         }
         else {
             key = item.replace('./src/', '').slice(0, -3);
             entryTemplateMap[key] = newConfig["default-template"];
             entryPath = item;
         }
-        
-        entry[key] = entryPath
-    });
-    Object.keys(entryTemplateMap).map((key)=>{
         let templateName = key + '.html';
-        outHtml.push(new HtmlWebpackPlugin({
+         outHtml.push(new HtmlWebpackPlugin({
             filename: templateName,
             template: entryTemplateMap[key],
-            inject: true,
-            chunks: ['index'],// 需要插入该html的js文件，从入口文件中选取对应的js文件名称（打包后的js文件名称）
+            inject: 'body', // 所有JavaScript资源插入到body元素的底部 head: 所有JavaScript资源插入到head元素中。
+            // inject： false:所有静态资源css和JavaScript都不会注入到模板文件中,一般需要自定义模板配置的时候使用。
+            chunks: [key],// 需要插入该html的js文件，从入口文件中选取对应的js文件名称（打包后的js文件名称）
             minify: {
                 removeComments: true,
-                collapseWhitespace: true, //压缩空白
+                // collapseWhitespace: true, //压缩空白
                 removeAttributeQuotes: true //删除属性双引号
             },
-            hash: true // 消除缓存，添加版本号
+            // hash: true // 消除缓存，添加版本号
         }))
-    })
-    console.log(outHtml)
+        entry[key] = entryPath
+    });
+    // Object.keys(entryTemplateMap).map((key)=>{
+    //     let templateName = key + '.html';
+    //     outHtml.push(new HtmlWebpackPlugin({
+    //         filename: templateName,
+    //         template: entryTemplateMap[key],
+    //         // inject: true, // 所有JavaScript资源插入到body元素的底部 head: 所有JavaScript资源插入到head元素中。
+    //         // inject： false:所有静态资源css和JavaScript都不会注入到模板文件中,一般需要自定义模板配置的时候使用。
+    //         chunks: '[name]',// 需要插入该html的js文件，从入口文件中选取对应的js文件名称（打包后的js文件名称）
+    //         minify: {
+    //             removeComments: true,
+    //             collapseWhitespace: true, //压缩空白
+    //             removeAttributeQuotes: true //删除属性双引号
+    //         },
+    //         // hash: true // 消除缓存，添加版本号
+    //     }))
+    // })
     return {
         entry,
         template: entryTemplateMap,

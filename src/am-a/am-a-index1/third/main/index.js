@@ -12,6 +12,7 @@ class App extends React.Component {
         // }
     }
     render() {
+        console.log('aaa')
         return (
             // <div className='title'>
             <div>
